@@ -6,6 +6,8 @@ export const Home = () => {
   const [task, setTask] = useState<ITask[]>([]);
   const [name, setName] = useState('');
   const [status, setStatus] = useState('pendente');
+  const [selectValue, setSelectValue] = useState({name: "", status: "", id: ""});
+
 
   useEffect(() => {
     TasksService.getAll().then((result) => {
@@ -49,6 +51,27 @@ export const Home = () => {
     });
   }, []);
 
+  const handleEdit = useCallback((name: string) => {
+    if(name === selectValue.name) {
+      const { id, status } = selectValue;
+
+      TasksService.updateById(parseInt(id), status).then((result) => {
+        if(result instanceof ApiException) {
+          alert(result.message);
+        } else {
+          console.log('not implemented')
+        };
+      });
+    }
+
+    
+  }, [selectValue]);
+
+  const handleEditSelect = (event: any) => {
+    const { name, value, id } = event.target;
+    setSelectValue({name, status: value, id})
+  }
+
   return (
     <div className="container">
       <p>To-Do List</p>
@@ -72,18 +95,17 @@ export const Home = () => {
       {task.map((taskItem) => {
         return <li key={taskItem.id}>
             {taskItem.name} 
-              <select defaultValue={taskItem.status}>
+              <select name={taskItem.name} id={taskItem.id.toString()} defaultValue={taskItem.status} onChange= {handleEditSelect}>
                 <option defaultValue="pendente" >pendente</option>
                 <option defaultValue="andamento">em andamento</option>
                 <option defaultValue="pronto">pronto</option>
               </select>
-            <button>Atualizar</button>
+            <button onClick={() => handleEdit(taskItem.name)}>Atualizar</button>
             <button onClick={() => handleRemove(taskItem.id)}>Remover</button>
             </li>
         })}
       </ul>
       </div>
-      
     </div>
   )
 }

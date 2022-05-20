@@ -12,7 +12,7 @@ const getAll = async (): Promise<ITask[]| ApiException> => {
     const { data } = await Api().get('/task');
     return data;
   } catch (error: any) {
-    return new ApiException(error.message || 'Error ao buscar os registros.')
+    return new ApiException(error.message || 'Error ao buscar as tarefas.')
   }
 };
 
@@ -21,13 +21,13 @@ const create = async (dataToCreate: Omit<ITask, 'id'>): Promise<ITask| ApiExcept
     const { data } = await Api().post('/task', dataToCreate);
     return data;
   } catch (error: any) {
-    return new ApiException(error.message || 'Error ao criar registro.')
+    return new ApiException(error.message || 'Error ao criar tarefa.')
   }
 };
 
-const updateById = async (id: number, status: string): Promise<ITask| ApiException> => {
+const updateById = async (id: number, status: string) => {
   try {
-    const { data } = await Api().put(`/task/${id}`, status);
+    const { data } = await Api().put(`/task/${id}`, {status});
     return data;
   } catch (error: any) {
     return new ApiException(error.message || 'Error ao atualizar a tarefa.')
