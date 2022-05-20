@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ApiException } from "../../shared/services/apiException";
 import { ITask, TasksService } from "../../shared/services/taskService";
 
@@ -22,36 +22,63 @@ export const Home = () => {
     setStatus(event.target.value);
   }
 
+  const create  = useCallback(() => {
+    if(task.some((taskItem) => taskItem.name === name)) return task;
+
+    TasksService.create({ name, status })
+    .then((result) => {
+      if(result instanceof ApiException) {
+        alert(result.message);
+      } else {
+        setTask((oldTask) => [...oldTask, result]);
+      }
+    })
+
+  }, [task, name, status]);
+
+  const handleRemove = useCallback((id: number) => {
+    TasksService.deleteById(id)
+    .then((result) => {
+      if(result instanceof ApiException) {
+        alert(result.message);
+      } else {
+        setTask(oldTask => {
+          return oldTask.filter(oldTaskItem => oldTaskItem.id !== id);
+          });
+      };
+    });
+  }, []);
+
   return (
     <div className="container">
       <p>To-Do List</p>
       <div className="container-header">
         <label>
             Nome:
-            <input name="name" value={name} onChange={handleChange} />
+            <input name="name" defaultValue={name} onChange={handleChange} />
         </label>
         <label>
             Status:
-            <select value={status} onChange={handleChange}>
-            <option value="pendente">pendente</option>
-                <option value="em andamento">em andamento</option>
-                <option value="pronto">pronto</option>
+            <select defaultValue={status} onChange={handleChange}>
+            <option defaultValue="pendente">pendente</option>
+                <option defaultValue="em andamento">em andamento</option>
+                <option defaultValue="pronto">pronto</option>
             </select>
         </label>
-        <button>Adicionar</button>
+        <button onClick={create}>Adicionar</button>
       </div>
       <div className="container-content">
       <ul>
       {task.map((taskItem) => {
         return <li key={taskItem.id}>
             {taskItem.name} 
-              <select value={taskItem.status}>
-                <option value="pendente" >pendente</option>
-                <option value="andamento">em andamento</option>
-                <option value="pronto">pronto</option>
+              <select defaultValue={taskItem.status}>
+                <option defaultValue="pendente" >pendente</option>
+                <option defaultValue="andamento">em andamento</option>
+                <option defaultValue="pronto">pronto</option>
               </select>
             <button>Atualizar</button>
-            <button>Remover</button>
+            <button onClick={() => handleRemove(taskItem.id)}>Remover</button>
             </li>
         })}
       </ul>
@@ -60,3 +87,4 @@ export const Home = () => {
     </div>
   )
 }
+
